@@ -1,0 +1,992 @@
+@import "tailwindcss";
+
+/*
+============================================================
+ BOTEXIUM MASTER GLOBAL DESIGN SYSTEM
+============================================================
+
+ IMPORTANT:
+ This file controls the VISUAL SYSTEM only.
+
+ It does NOT force text alignment or component layout.
+
+ Existing sections remain responsible for:
+ - text alignment
+ - spacing
+ - responsive sizing
+ - section-specific layout
+
+ This prevents the global system from breaking the
+ original BOTEXIUM Home design.
+============================================================
+*/
+
+
+/* ==========================================================
+   MASTER TOKENS
+========================================================== */
+
+:root {
+
+  /* BRAND */
+  --BOTEXIUM-primary: #22d3ee;
+  --BOTEXIUM-primary-hover: #67e8f9;
+  --BOTEXIUM-primary-dark: #0891b2;
+  --BOTEXIUM-secondary: #06b6d4;
+  --BOTEXIUM-accent: #00d4ff;
+
+  /* BACKGROUND */
+  --BOTEXIUM-bg: #050816;
+  --BOTEXIUM-bg-secondary: #07101f;
+  --BOTEXIUM-bg-tertiary: #0a1020;
+
+  /* SURFACES */
+  --BOTEXIUM-surface: rgba(255, 255, 255, 0.05);
+  --BOTEXIUM-surface-light: rgba(255, 255, 255, 0.07);
+  --BOTEXIUM-surface-dark: rgba(255, 255, 255, 0.025);
+
+  /* BORDERS */
+  --BOTEXIUM-border: rgba(34, 211, 238, 0.16);
+  --BOTEXIUM-border-strong: rgba(34, 211, 238, 0.28);
+  --BOTEXIUM-border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* ========================================================
+     MASTER TEXT HIERARCHY
+  ======================================================== */
+
+  --BOTEXIUM-text-primary: #f8fafc;
+  --BOTEXIUM-text-strong: #ffffff;
+
+  --BOTEXIUM-text-secondary: #d1d5db;
+  --BOTEXIUM-text-body: #cbd5e1;
+  --BOTEXIUM-text-body-strong: #e5e7eb;
+
+  --BOTEXIUM-text-muted: #94a3b8;
+  --BOTEXIUM-text-muted-readable: #9ca3af;
+
+  --BOTEXIUM-text-subtle: #64748b;
+  --BOTEXIUM-text-disabled: #475569;
+
+  /* STATUS */
+  --BOTEXIUM-success: #4ade80;
+  --BOTEXIUM-warning: #facc15;
+  --BOTEXIUM-danger: #f87171;
+  --BOTEXIUM-info: #38bdf8;
+
+  /* FONT */
+  --font-BOTEXIUM-sans: var(--font-geist-sans);
+  --font-BOTEXIUM-mono: var(--font-geist-mono);
+
+  /* FONT SIZES */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.5rem;
+  --font-3xl: 1.875rem;
+  --font-4xl: 2.25rem;
+  --font-5xl: 3rem;
+  --font-6xl: 3.75rem;
+
+  /* FONT WEIGHTS */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* TRACKING */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-label: 0.15em;
+  --tracking-section: 0.20em;
+  --tracking-brand: 0.25em;
+
+  /* RADIUS */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-card: 24px;
+  --radius-pill: 9999px;
+
+  /* GLOW */
+  --glow-primary:
+    0 0 25px rgba(34, 211, 238, 0.10);
+
+  --glow-primary-strong:
+    0 0 35px rgba(34, 211, 238, 0.20);
+
+  --glow-card:
+    0 15px 40px rgba(0, 212, 255, 0.15),
+    0 0 35px rgba(0, 212, 255, 0.08);
+
+  --glow-button:
+    0 10px 30px rgba(34, 211, 238, 0.25);
+
+  --glow-button-hover:
+    0 18px 45px rgba(34, 211, 238, 0.35),
+    0 0 25px rgba(34, 211, 238, 0.20);
+
+  --glow-text:
+    0 0 30px rgba(34, 211, 238, 0.18),
+    0 0 60px rgba(34, 211, 238, 0.10);
+
+  /* TRANSITIONS */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.35s ease;
+  --transition-slow: 0.8s ease;
+
+  /* LAYOUT */
+  --BOTEXIUM-max-width: 1280px;
+}
+
+
+/* ==========================================================
+   TAILWIND BRIDGE
+========================================================== */
+
+@theme inline {
+
+  --color-background: var(--BOTEXIUM-bg);
+  --color-foreground: var(--BOTEXIUM-text-primary);
+
+  --color-BOTEXIUM-primary: var(--BOTEXIUM-primary);
+  --color-BOTEXIUM-secondary: var(--BOTEXIUM-secondary);
+  --color-BOTEXIUM-accent: var(--BOTEXIUM-accent);
+
+  --color-BOTEXIUM-success: var(--BOTEXIUM-success);
+  --color-BOTEXIUM-warning: var(--BOTEXIUM-warning);
+  --color-BOTEXIUM-danger: var(--BOTEXIUM-danger);
+  --color-BOTEXIUM-info: var(--BOTEXIUM-info);
+
+  --color-BOTEXIUM-muted: var(--BOTEXIUM-text-muted);
+
+  --font-sans: var(--font-BOTEXIUM-sans);
+  --font-mono: var(--font-BOTEXIUM-mono);
+}
+
+
+/* ==========================================================
+   BASE
+========================================================== */
+
+html {
+  scroll-behavior: smooth;
+  background: var(--BOTEXIUM-bg);
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+
+  background: var(--BOTEXIUM-bg);
+
+  color: var(--BOTEXIUM-text-primary);
+
+  font-family:
+    var(--font-BOTEXIUM-sans),
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: var(--font-md);
+  line-height: 1.6;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================
+   MASTER VISUAL TYPOGRAPHY CLASSES
+   ----------------------------------------------------------
+   These classes control typography when a component wants
+   the master hierarchy.
+
+   They NEVER force text alignment.
+========================================================== */
+
+.BOTEXIUM-heading {
+  color: var(--BOTEXIUM-text-primary);
+  font-weight: var(--weight-bold);
+}
+
+.BOTEXIUM-heading-strong {
+  color: var(--BOTEXIUM-text-strong);
+  font-weight: var(--weight-extrabold);
+}
+
+.BOTEXIUM-body {
+  color: var(--BOTEXIUM-text-body);
+}
+
+.BOTEXIUM-body-strong {
+  color: var(--BOTEXIUM-text-body-strong);
+}
+
+.BOTEXIUM-muted {
+  color: var(--BOTEXIUM-text-muted-readable);
+}
+
+.BOTEXIUM-subtle {
+  color: var(--BOTEXIUM-text-subtle);
+}
+
+.BOTEXIUM-section-label {
+  color: var(--BOTEXIUM-text-muted);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-section);
+  text-transform: uppercase;
+}
+
+.BOTEXIUM-section-title {
+  color: var(--BOTEXIUM-text-strong);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.BOTEXIUM-section-description {
+  color: var(--BOTEXIUM-text-body);
+  line-height: 1.75;
+}
+
+
+/* ==========================================================
+   PAGE BACKGROUND
+========================================================== */
+
+.BOTEXIUM-page-bg {
+  position: relative;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(0, 212, 255, 0.08),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 153, 255, 0.07),
+      transparent 35%
+    ),
+    var(--BOTEXIUM-bg);
+}
+
+.section-bg {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(0, 212, 255, 0.08),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 153, 255, 0.07),
+      transparent 35%
+    );
+}
+
+
+/* ==========================================================
+   MASTER GLASS CARD
+========================================================== */
+
+.glass-card {
+  position: relative;
+  overflow: hidden;
+
+  background: var(--BOTEXIUM-surface);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid var(--BOTEXIUM-border);
+
+  border-radius: var(--radius-card);
+
+  transition:
+    transform var(--transition-normal),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    background var(--transition-normal);
+}
+
+.glass-card:hover {
+  transform:
+    translateY(-8px)
+    scale(1.01);
+
+  background: var(--BOTEXIUM-surface-light);
+
+  border-color: var(--BOTEXIUM-primary);
+
+  box-shadow: var(--glow-card);
+}
+
+
+/* ==========================================================
+   CARD LIGHT SWEEP
+========================================================== */
+
+.glass-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: -50%;
+  left: -50%;
+
+  width: 200%;
+  height: 200%;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+
+  transform: rotate(25deg);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    left var(--transition-slow),
+    opacity var(--transition-slow);
+}
+
+.glass-card:hover::before {
+  left: 100%;
+  opacity: 1;
+}
+
+
+/* ==========================================================
+   STATIC GLASS CARD
+========================================================== */
+
+.glass-card-static {
+  position: relative;
+  overflow: hidden;
+
+  background: var(--BOTEXIUM-surface);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid var(--BOTEXIUM-border);
+
+  border-radius: var(--radius-card);
+}
+
+
+/* ==========================================================
+   MASTER BRAND
+========================================================== */
+
+.BOTEXIUM-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 0.75rem;
+
+  color: var(--BOTEXIUM-text-primary);
+
+  font-size: 1.25rem;
+  font-weight: var(--weight-extrabold);
+
+  letter-spacing: var(--tracking-brand);
+}
+
+.BOTEXIUM-brand-mark {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 2.75rem;
+  height: 2.75rem;
+
+  border: 1px solid rgba(34, 211, 238, 0.28);
+
+  border-radius: var(--radius-md);
+
+  background: rgba(34, 211, 238, 0.05);
+
+  color: var(--BOTEXIUM-primary-hover);
+
+  font-size: 1.25rem;
+  font-weight: var(--weight-extrabold);
+
+  box-shadow: var(--glow-primary);
+}
+
+
+/* ==========================================================
+   HERO
+========================================================== */
+
+.hero-title {
+  background:
+    linear-gradient(
+      90deg,
+      #ffffff,
+      var(--BOTEXIUM-primary-hover),
+      var(--BOTEXIUM-primary)
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+  color: transparent;
+}
+
+.hero-glow {
+  text-shadow: var(--glow-text);
+}
+
+
+/* ==========================================================
+   MASTER BUTTON
+========================================================== */
+
+.premium-btn {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  min-height: 46px;
+
+  padding: 12px 28px;
+
+  border: none;
+
+  border-radius: var(--radius-pill);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--BOTEXIUM-primary),
+      var(--BOTEXIUM-secondary)
+    );
+
+  color: #000000;
+
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    filter var(--transition-normal);
+
+  box-shadow: var(--glow-button);
+}
+
+.premium-btn:hover {
+  transform:
+    translateY(-3px)
+    scale(1.03);
+
+  box-shadow: var(--glow-button-hover);
+
+  filter: brightness(1.05);
+}
+
+.premium-btn:active {
+  transform:
+    translateY(-1px)
+    scale(1.01);
+}
+
+.premium-btn:focus-visible {
+  outline: 2px solid var(--BOTEXIUM-primary);
+  outline-offset: 4px;
+}
+
+
+/* ==========================================================
+   SECONDARY BUTTON
+========================================================== */
+
+.BOTEXIUM-btn-secondary {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  min-height: 44px;
+
+  padding: 10px 24px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--BOTEXIUM-text-secondary);
+
+  border: 1px solid var(--BOTEXIUM-border);
+
+  border-radius: var(--radius-pill);
+
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+
+  transition:
+    background var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.BOTEXIUM-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.07);
+
+  color: var(--BOTEXIUM-text-primary);
+
+  border-color: var(--BOTEXIUM-border-strong);
+
+  box-shadow: var(--glow-primary);
+}
+
+
+/* ==========================================================
+   DIVIDER
+========================================================== */
+
+.BOTEXIUM-divider {
+  width: 100%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--BOTEXIUM-border-strong),
+      transparent
+    );
+}
+
+
+/* ==========================================================
+   FORM READABILITY
+========================================================== */
+
+input,
+textarea,
+select {
+  color: var(--BOTEXIUM-text-body-strong);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--BOTEXIUM-text-muted);
+}
+
+
+/* ==========================================================
+   LINKS
+========================================================== */
+
+a {
+  transition:
+    color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+
+/* ==========================================================
+   ACCESSIBILITY
+========================================================== */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--BOTEXIUM-primary);
+  outline-offset: 3px;
+}
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--BOTEXIUM-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.22);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.42);
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 640px) {
+
+  body {
+    font-size: 0.9375rem;
+  }
+
+  .BOTEXIUM-section-description {
+    line-height: 1.7;
+  }
+
+  .premium-btn {
+    min-height: 44px;
+    padding: 11px 22px;
+  }
+}
+
+
+/* ==========================================================
+   REDUCED MOTION
+========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   BOTEXIUM MASTER APPLICATION HIERARCHY
+   Single visual authority for all BOTEXIUM sections
+============================================================ */
+
+.BOTEXIUM-app {
+  font-family: var(--font-BOTEXIUM-sans), Arial, Helvetica, sans-serif;
+  color: var(--BOTEXIUM-text-primary);
+}
+
+/* Master headings */
+.BOTEXIUM-app h1,
+.BOTEXIUM-app h2,
+.BOTEXIUM-app h3,
+.BOTEXIUM-app h4,
+.BOTEXIUM-app h5,
+.BOTEXIUM-app h6 {
+  font-family: var(--font-BOTEXIUM-sans), Arial, Helvetica, sans-serif;
+  color: var(--BOTEXIUM-heading);
+}
+
+/* Master body */
+.BOTEXIUM-app p {
+  color: var(--BOTEXIUM-body);
+}
+
+/* Strong content */
+.BOTEXIUM-app strong {
+  color: var(--BOTEXIUM-heading-strong);
+}
+
+/* Readable muted content */
+.BOTEXIUM-app small {
+  color: var(--BOTEXIUM-muted-readable);
+}
+
+/* Master section title */
+.BOTEXIUM-app .BOTEXIUM-section-title {
+  color: var(--BOTEXIUM-heading-strong);
+  font-weight: var(--weight-extrabold);
+}
+
+/* Master body text */
+.BOTEXIUM-app .BOTEXIUM-body {
+  color: var(--BOTEXIUM-body);
+}
+
+/* Master muted text */
+.BOTEXIUM-app .BOTEXIUM-muted {
+  color: var(--BOTEXIUM-muted-readable);
+}
+
+/* Master section label */
+.BOTEXIUM-app .BOTEXIUM-section-label {
+  color: var(--BOTEXIUM-section-label);
+}/* ============================================================
+   BOTEXIUM MASTER DASHBOARD TYPOGRAPHY
+   Dashboard follows the same global hierarchy
+============================================================ */
+
+.BOTEXIUM-app [class*="dashboard"] {
+  font-family: var(--font-BOTEXIUM-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Dashboard headings */
+.BOTEXIUM-app [class*="dashboard"] h1,
+.BOTEXIUM-app [class*="dashboard"] h2,
+.BOTEXIUM-app [class*="dashboard"] h3,
+.BOTEXIUM-app [class*="dashboard"] h4,
+.BOTEXIUM-app [class*="dashboard"] h5,
+.BOTEXIUM-app [class*="dashboard"] h6 {
+  color: var(--BOTEXIUM-heading);
+}
+
+/* Dashboard paragraphs */
+.BOTEXIUM-app [class*="dashboard"] p {
+  color: var(--BOTEXIUM-body);
+}
+
+/* Dashboard readable secondary text */
+.BOTEXIUM-app [class*="dashboard"] small {
+  color: var(--BOTEXIUM-muted-readable);
+}
+
+/* ============================================================
+   BOTEXIUM DASHBOARD MASTER TYPOGRAPHY CONTROL
+   Existing Tailwind typography is centrally controlled here.
+============================================================ */
+
+.BOTEXIUM-dashboard {
+  font-family: var(--font-BOTEXIUM-sans), Arial, Helvetica, sans-serif;
+  color: var(--BOTEXIUM-text-primary);
+}
+
+/* ------------------------------------------------------------
+   HEADINGS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard h1 {
+  color: var(--BOTEXIUM-heading-strong) !important;
+  font-weight: var(--weight-extrabold) !important;
+  line-height: 1.08 !important;
+  letter-spacing: var(--tracking-tight) !important;
+}
+
+.BOTEXIUM-dashboard h2 {
+  color: var(--BOTEXIUM-heading) !important;
+  font-weight: var(--weight-bold) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.BOTEXIUM-dashboard h3 {
+  color: var(--BOTEXIUM-heading) !important;
+  font-weight: var(--weight-semibold) !important;
+  line-height: 1.25 !important;
+}
+
+.BOTEXIUM-dashboard h4,
+.BOTEXIUM-dashboard h5,
+.BOTEXIUM-dashboard h6 {
+  color: var(--BOTEXIUM-heading) !important;
+  font-weight: var(--weight-semibold) !important;
+}
+
+/* ------------------------------------------------------------
+   PARAGRAPHS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard p {
+  color: var(--BOTEXIUM-body) !important;
+  line-height: 1.7 !important;
+}
+
+/* ------------------------------------------------------------
+   SECONDARY / MUTED TEXT
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard small {
+  color: var(--BOTEXIUM-muted-readable) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-300 {
+  color: var(--BOTEXIUM-body-strong) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-400 {
+  color: var(--BOTEXIUM-body) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-500 {
+  color: var(--BOTEXIUM-muted-readable) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-600 {
+  color: var(--BOTEXIUM-muted) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-700 {
+  color: var(--BOTEXIUM-subtle) !important;
+}
+
+/* ------------------------------------------------------------
+   PRIMARY WHITE TEXT
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard .text-white {
+  color: var(--BOTEXIUM-heading-strong) !important;
+}
+
+.BOTEXIUM-dashboard .text-gray-200 {
+  color: var(--BOTEXIUM-body-strong) !important;
+}
+
+/* ------------------------------------------------------------
+   MASTER TYPOGRAPHY SCALE
+   Existing Tailwind sizes remain usable, but are normalized.
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard .text-xs {
+  font-size: var(--font-xs) !important;
+}
+
+.BOTEXIUM-dashboard .text-sm {
+  font-size: var(--font-sm) !important;
+}
+
+.BOTEXIUM-dashboard .text-base {
+  font-size: var(--font-md) !important;
+}
+
+.BOTEXIUM-dashboard .text-lg {
+  font-size: var(--font-lg) !important;
+}
+
+.BOTEXIUM-dashboard .text-xl {
+  font-size: var(--font-xl) !important;
+}
+
+.BOTEXIUM-dashboard .text-2xl {
+  font-size: var(--font-2xl) !important;
+}
+
+.BOTEXIUM-dashboard .text-3xl {
+  font-size: var(--font-3xl) !important;
+}
+
+.BOTEXIUM-dashboard .text-4xl {
+  font-size: var(--font-4xl) !important;
+}
+
+/* ------------------------------------------------------------
+   MASTER WEIGHTS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard .font-normal {
+  font-weight: var(--weight-normal) !important;
+}
+
+.BOTEXIUM-dashboard .font-medium {
+  font-weight: var(--weight-medium) !important;
+}
+
+.BOTEXIUM-dashboard .font-semibold {
+  font-weight: var(--weight-semibold) !important;
+}
+
+.BOTEXIUM-dashboard .font-bold {
+  font-weight: var(--weight-bold) !important;
+}
+
+.BOTEXIUM-dashboard .font-extrabold {
+  font-weight: var(--weight-extrabold) !important;
+}
+
+/* ------------------------------------------------------------
+   MASTER LABELS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard .BOTEXIUM-label,
+.BOTEXIUM-dashboard .BOTEXIUM-dashboard-label {
+  color: var(--BOTEXIUM-primary) !important;
+  font-size: var(--font-xs) !important;
+  font-weight: var(--weight-semibold) !important;
+  line-height: 1.2 !important;
+  letter-spacing: var(--tracking-section) !important;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------
+   MASTER BODY HELPERS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard .BOTEXIUM-body,
+.BOTEXIUM-dashboard .BOTEXIUM-body-text {
+  color: var(--BOTEXIUM-body) !important;
+}
+
+.BOTEXIUM-dashboard .BOTEXIUM-muted {
+  color: var(--BOTEXIUM-muted-readable) !important;
+}
+
+/* ------------------------------------------------------------
+   LINKS
+------------------------------------------------------------ */
+
+.BOTEXIUM-dashboard a {
+  font-family: var(--font-BOTEXIUM-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ------------------------------------------------------------
+   MOBILE
+------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+
+  .BOTEXIUM-dashboard h1 {
+    line-height: 1.1 !important;
+  }
+
+  .BOTEXIUM-dashboard h2 {
+    line-height: 1.18 !important;
+  }
+
+  .BOTEXIUM-dashboard p {
+    line-height: 1.7 !important;
+  }
+}

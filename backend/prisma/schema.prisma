@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  country      String?
+  referralCode String         @unique
+  referredById String?
+  role         UserRole       @default(USER)
+  status       UserStatus     @default(ACTIVE)
+  points       Int            @default(0)
+  resetToken   String?        @unique
+  resetTokenExpires DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  twoFactorSecret   String?   // ✅ 2FA secret store karne ke liye
+  twoFactorEnabled  Boolean   @default(false) // ✅ 2FA enabled hai ya nahi
+  
+  // Relations
+  referredBy   User?          @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals    User[]         @relation("UserReferrals")
+  sessions     Session[]
+  pointLedger  PointLedger[] 
+  activities   UserActivity[]
+  @@index([referredById])
+  @@index([status])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model PointLedger {
+  id        String    @id @default(cuid())
+  userId    String
+  type      PointType
+  points    Int
+  reason    String
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+model Activity {
+  id             String         @id @default(cuid())
+  title          String
+  description    String?
+  points         Int
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  userActivities UserActivity[]
+}
+
+model UserActivity {
+  id         String         @id @default(cuid())
+  userId     String
+  activityId String
+  status     ActivityStatus @default(PENDING)
+  points     Int
+  proof      String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  activity   Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
+  @@index([status])
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum PointType {
+  ACTIVITY
+  REFERRAL
+  BONUS
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum ActivityStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

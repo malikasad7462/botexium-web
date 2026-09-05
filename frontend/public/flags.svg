@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true">
+<defs>
+
+<!-- Pakistan - Fixed: White on left, Green on right -->
+<symbol id="pk" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#01411C"/>
+  <rect width="30" height="80" fill="#FFFFFF"/>
+  <path d="M72 20c-12 0-22 9-22 20s10 20 22 20c7 0 13-3 17-8-3 1-6 2-9 2-10 0-18-7-18-16s8-16 18-16c3 0 6 1 9 2-4-5-10-8-17-8z" fill="#FFFFFF"/>
+  <path d="M95 31l3 8 9 0-7 5 3 8-8-5-8 5 3-8-7-5 9 0z" fill="#FFFFFF"/>
+</symbol>
+
+<!-- Afghanistan - Black, Red, Green (correct) -->
+<symbol id="af" viewBox="0 0 120 80">
+  <rect width="40" height="80" fill="#000000"/>
+  <rect x="40" width="40" height="80" fill="#D32011"/>
+  <rect x="80" width="40" height="80" fill="#007A36"/>
+  <circle cx="60" cy="40" r="15" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+</symbol>
+
+<!-- UAE - Green, White, Black with Red bar (correct) -->
+<symbol id="ae" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#00732F"/>
+  <rect y="26.67" width="120" height="26.66" fill="#FFFFFF"/>
+  <rect y="53.33" width="120" height="26.67" fill="#000000"/>
+  <rect width="30" height="80" fill="#FF0000"/>
+</symbol>
+
+<!-- Saudi Arabia - Green with white text (correct) -->
+<symbol id="sa" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#006C35"/>
+  <path d="M25 45h70" stroke="#FFFFFF" stroke-width="4"/>
+  <path d="M30 36h60" stroke="#FFFFFF" stroke-width="2"/>
+</symbol>
+
+<!-- Qatar - Maroon with white serrated edge (correct) -->
+<symbol id="qa" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#8A1538"/>
+  <path d="M0 0h40l12 8-12 8 12 8-12 8 12 8-12 8 12 8-12 8 12 8H0z" fill="#FFFFFF"/>
+</symbol>
+
+<!-- Oman - White, Red, Green with Red bar (correct) -->
+<symbol id="om" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <rect y="26.67" width="120" height="26.66" fill="#D22730"/>
+  <rect y="53.33" width="120" height="26.67" fill="#00843D"/>
+  <rect width="30" height="80" fill="#D22730"/>
+</symbol>
+
+<!-- Bahrain - Red with white serrated edge (correct) -->
+<symbol id="bh" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#CE1126"/>
+  <path d="M0 0h42l-10 8 10 8-10 8 10 8-10 8 10 8-10 8 10 8H0z" fill="#FFFFFF"/>
+</symbol>
+
+<!-- Kuwait - Green, White, Red with Black trapezoid (correct) -->
+<symbol id="kw" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <rect y="26.67" width="120" height="26.66" fill="#CE1126"/>
+  <rect y="53.33" width="120" height="26.67" fill="#007A3D"/>
+  <path d="M0 0h28l12 40L28 80H0l12-40z" fill="#000000"/>
+</symbol>
+
+<!-- UK - Union Jack (correct) -->
+<symbol id="gb" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#012169"/>
+  <path d="M0 0l120 80M120 0L0 80" stroke="#FFFFFF" stroke-width="16"/>
+  <path d="M0 0l120 80M120 0L0 80" stroke="#C8102E" stroke-width="8"/>
+  <path d="M60 0v80M0 40h120" stroke="#FFFFFF" stroke-width="24"/>
+  <path d="M60 0v80M0 40h120" stroke="#C8102E" stroke-width="14"/>
+</symbol>
+
+<!-- USA - Stars and Stripes (correct) -->
+<symbol id="us" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <path d="M0 0h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0z" fill="#B22234"/>
+  <rect width="50" height="43" fill="#3C3B6E"/>
+  <!-- Stars (simplified) -->
+  <circle cx="25" cy="14" r="2" fill="#FFFFFF"/>
+  <circle cx="25" cy="30" r="2" fill="#FFFFFF"/>
+</symbol>
+
+<!-- Canada - Red bars with maple leaf (correct) -->
+<symbol id="ca" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <rect width="30" height="80" fill="#D52B1E"/>
+  <rect x="90" width="30" height="80" fill="#D52B1E"/>
+  <path d="M60 17l5 13 10-5-5 11 12 4-12 4 4 13-10-8-10 8 4-13-12-4 12-4-5-11 10 5z" fill="#D52B1E"/>
+</symbol>
+
+<!-- Australia - Blue with Union Jack and stars (correct) -->
+<symbol id="au" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#002868"/>
+  <path d="M0 0l60 40M60 0L0 40" stroke="#FFFFFF" stroke-width="12"/>
+  <path d="M0 0l60 40M60 0L0 40" stroke="#C8102E" stroke-width="6"/>
+  <path d="M30 0v40M0 20h60" stroke="#FFFFFF" stroke-width="14"/>
+  <path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="8"/>
+</symbol>
+
+<!-- Germany - Black, Red, Gold (correct) -->
+<symbol id="de" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#000000"/>
+  <rect y="26.67" width="120" height="26.66" fill="#DD0000"/>
+  <rect y="53.33" width="120" height="26.67" fill="#FFCE00"/>
+</symbol>
+
+<!-- France - Blue, White, Red (correct) -->
+<symbol id="fr" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <rect width="40" height="80" fill="#0055A4"/>
+  <rect x="80" width="40" height="80" fill="#EF4135"/>
+</symbol>
+
+<!-- Turkey - Red with white moon and star (correct) -->
+<symbol id="tr" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#E30A17"/>
+  <circle cx="50" cy="40" r="19" fill="#FFFFFF"/>
+  <circle cx="57" cy="40" r="15" fill="#E30A17"/>
+  <path d="M72 40l12 7-5-14 10-9-14 1-5-13-4 13-14-1 10 9-5 14z" fill="#FFFFFF"/>
+</symbol>
+
+<!-- Malaysia - Red/white stripes with blue canton (correct) -->
+<symbol id="my" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <path d="M0 0h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0zm0 12h120v6H0z" fill="#CC0001"/>
+  <rect width="58" height="44" fill="#010066"/>
+  <circle cx="27" cy="22" r="12" fill="#FFCC00"/>
+  <circle cx="32" cy="20" r="10" fill="#010066"/>
+</symbol>
+
+<!-- Indonesia - Red on top, White on bottom (correct) -->
+<symbol id="id" viewBox="0 0 120 80">
+  <rect width="120" height="40" fill="#CE1126"/>
+  <rect y="40" width="120" height="40" fill="#FFFFFF"/>
+</symbol>
+
+<!-- India - Saffron, White, Green with wheel (correct) -->
+<symbol id="in" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#FFFFFF"/>
+  <rect width="120" height="26.67" fill="#FF9933"/>
+  <rect y="53.33" width="120" height="26.67" fill="#138808"/>
+  <circle cx="60" cy="40" r="10" fill="none" stroke="#000080" stroke-width="2"/>
+</symbol>
+
+<!-- Bangladesh - Green with red circle (correct) -->
+<symbol id="bd" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#006A4E"/>
+  <circle cx="57" cy="40" r="22" fill="#F42A41"/>
+</symbol>
+
+</defs>
+</svg>

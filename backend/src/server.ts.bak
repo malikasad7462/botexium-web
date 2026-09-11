@@ -1,0 +1,122 @@
+export default {
+  async fetch(request: Request, env: any, ctx: any): Promise<Response> {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // ✅ CORS Headers
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "https://botexium.com",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
+    };
+
+    // ✅ Handle Preflight (OPTIONS)
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+
+    try {
+      // ✅ Health Check
+      if (path === "/" || path === "/health") {
+        return new Response(JSON.stringify({
+          status: "ok",
+          message: "BOTEXIUM API is running",
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ✅ Login Route
+      if (path === "/api/auth/login" && request.method === "POST") {
+        const body: any = await request.json();
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Login successful (placeholder)",
+          user: { email: body.email, name: "Test User" },
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ✅ Register Route
+      if (path === "/api/auth/register" && request.method === "POST") {
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Registration successful (placeholder)",
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ✅ Me Route
+      if (path === "/api/auth/me") {
+        return new Response(JSON.stringify({
+          success: true,
+          user: {
+            id: "user_123",
+            name: "Test User",
+            email: "test@botexium.com",
+            referralCode: "BTX123",
+            role: "USER",
+          },
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ✅ Settings Route
+      if (path === "/api/admin/settings") {
+        return new Response(JSON.stringify({
+          success: true,
+          settings: {
+            announcement_enabled: "false",
+            token_price: "0.01",
+            lock_period: "7",
+            min_purchase: "10",
+          },
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ✅ Announcements Route
+      if (path === "/api/admin/announcements") {
+        return new Response(JSON.stringify({
+          success: true,
+          announcements: [],
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ❌ Not Found
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Not Found",
+        path: path,
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
+    } catch (error) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Internal Server Error",
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+};

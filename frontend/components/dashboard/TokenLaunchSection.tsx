@@ -105,7 +105,7 @@ export default function TokenLaunchSection() {
         {/* CTA */}
         <div className="text-center mt-10">
           <a
-            href="#community"
+            href="/register"
             className="inline-flex items-center gap-2 premium-btn px-8 py-4 text-sm font-semibold"
           >
             Join the Whitelist

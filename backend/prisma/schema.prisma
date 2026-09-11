@@ -1,11 +1,13 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  runtime  = "cloudflare"
 }
 
 datasource db {
   provider = "sqlite"
 }
+
 
 model User {
   id           String         @id @default(cuid())
@@ -34,6 +36,15 @@ model User {
   activities   UserActivity[]
   @@index([referredById])
   @@index([status])
+
+  totalPurchased   Float   @default(0)
+  totalRewards     Float   @default(0)
+  isEligible       Boolean @default(false)
+  
+  purchases        Purchase[]           @relation("UserPurchases")
+  rewardsEarned    RewardDistribution[] @relation("Earner")
+  rewardsGenerated RewardDistribution[] @relation("Buyer")
+
 }
 
 model Session {
@@ -116,4 +127,74 @@ enum ActivityStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  category    String   @default("general")
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  text        String
+  isActive    Boolean   @default(true)
+  order       Int       @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String
+  target      String?
+  oldValue    String?
+  newValue    String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([adminId])
+  @@index([action])
+}
+
+model Purchase {
+  id           String   @id @default(cuid())
+  userId       String
+  usdtAmount   Float
+  tokenAmount  Float
+  price        Float
+  txHash       String?
+  status       String   @default("COMPLETED")
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation("UserPurchases", fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model RewardDistribution {
+  id           String   @id @default(cuid())
+  earnerId     String
+  buyerId      String
+  level        Int
+  rewardTokens Float
+  rewardUSDT   Float
+  status       String   @default("DISTRIBUTED")
+  createdAt    DateTime @default(now())
+  
+  earner       User     @relation("Earner", fields: [earnerId], references: [id])
+  buyer        User     @relation("Buyer", fields: [buyerId], references: [id])
+  
+  @@index([earnerId])
+  @@index([buyerId])
+  @@index([level])
 }

@@ -100,8 +100,57 @@ export async function registerUser(input: RegisterInput) {
       createdAt: true,
     },
   });
+try {
+    const signupEnabled = await prisma.setting.findUnique({
+      where: { key: "signup_bonus_enabled" },
+    });
+
+    if (signupEnabled?.value === "true") {
+      const pointsSetting = await prisma.setting.findUnique({
+        where: { key: "signup_bonus_points" },
+      });
+      const tokensSetting = await prisma.setting.findUnique({
+        where: { key: "signup_bonus_tokens" },
+      });
+      const usdtSetting = await prisma.setting.findUnique({
+        where: { key: "signup_bonus_usdt" },
+      });
+
+      const bonusPoints = parseInt(pointsSetting?.value || "0");
+      const bonusTokens = parseFloat(tokensSetting?.value || "0");
+      const bonusUSDT = parseFloat(usdtSetting?.value || "0");
+
+      if (bonusPoints > 0 || bonusTokens > 0 || bonusUSDT > 0) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            points: { increment: bonusPoints },
+            totalRewards: { increment: bonusTokens },
+          },
+        });
+
+        // ✅ Audit log
+        await prisma.auditLog.create({
+          data: {
+            adminId: "SYSTEM",
+            action: "SIGNUP_BONUS",
+            target: user.id,
+            newValue: JSON.stringify({
+              points: bonusPoints,
+              tokens: bonusTokens,
+              usdt: bonusUSDT,
+            }),
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Signup bonus error:", error);
+    // ✅ Signup bonus fail ho toh registration fail nahi honi chahiye
+  }
 
   return user;
+
 }
 
 export async function getUserByEmail(email: string) {

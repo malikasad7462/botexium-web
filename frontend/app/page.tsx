@@ -28,9 +28,9 @@ export default function Home() {
       <ScrollProgress />
       <Navbar />
       <Hero />
-      <HeroStats />
+      {/* <HeroStats /> */}
       <About />
-      <Leadership />
+      {/* <Leadership /> */}
       <Vision />
       <Mission />
       <Ecosystem />

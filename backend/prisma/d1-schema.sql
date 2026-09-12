@@ -16,6 +16,10 @@ CREATE TABLE "User" (
     "updatedAt" DATETIME NOT NULL,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "walletBalance" REAL NOT NULL DEFAULT 0,
+    "lockedBonus" REAL NOT NULL DEFAULT 0,
+    "lockedRewards" REAL NOT NULL DEFAULT 0,
+    "totalReleased" REAL NOT NULL DEFAULT 0,
     "totalPurchased" REAL NOT NULL DEFAULT 0,
     "totalRewards" REAL NOT NULL DEFAULT 0,
     "isEligible" BOOLEAN NOT NULL DEFAULT false,
@@ -131,6 +135,48 @@ CREATE TABLE "RewardDistribution" (
     CONSTRAINT "RewardDistribution_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
+-- CreateTable
+CREATE TABLE "BonusTransaction" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "amount" REAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'LOCKED',
+    "reason" TEXT,
+    "releasedAt" DATETIME,
+    "releasedBy" TEXT,
+    "txHash" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "BonusTransaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "RewardTransaction" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "amount" REAL NOT NULL,
+    "level" INTEGER NOT NULL,
+    "sourceId" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'LOCKED',
+    "releasedAt" DATETIME,
+    "releasedBy" TEXT,
+    "txHash" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "RewardTransaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "ReleaseHistory" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "amount" REAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "releasedBy" TEXT NOT NULL,
+    "txHash" TEXT,
+    "notes" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -199,4 +245,28 @@ CREATE INDEX "RewardDistribution_buyerId_idx" ON "RewardDistribution"("buyerId")
 
 -- CreateIndex
 CREATE INDEX "RewardDistribution_level_idx" ON "RewardDistribution"("level");
+
+-- CreateIndex
+CREATE INDEX "BonusTransaction_userId_idx" ON "BonusTransaction"("userId");
+
+-- CreateIndex
+CREATE INDEX "BonusTransaction_status_idx" ON "BonusTransaction"("status");
+
+-- CreateIndex
+CREATE INDEX "BonusTransaction_type_idx" ON "BonusTransaction"("type");
+
+-- CreateIndex
+CREATE INDEX "RewardTransaction_userId_idx" ON "RewardTransaction"("userId");
+
+-- CreateIndex
+CREATE INDEX "RewardTransaction_status_idx" ON "RewardTransaction"("status");
+
+-- CreateIndex
+CREATE INDEX "RewardTransaction_level_idx" ON "RewardTransaction"("level");
+
+-- CreateIndex
+CREATE INDEX "ReleaseHistory_userId_idx" ON "ReleaseHistory"("userId");
+
+-- CreateIndex
+CREATE INDEX "ReleaseHistory_releasedBy_idx" ON "ReleaseHistory"("releasedBy");
 

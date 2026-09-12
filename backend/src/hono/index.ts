@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { createPrisma } from './services/prisma';
 import authRoutes from './routes/auth.routes';
+import adminRoutes from './routes/admin.routes';
 
 type Env = {
   DB: D1Database;
@@ -33,6 +34,7 @@ app.use('*', cors({
 
 // ✅ Routes
 app.route('/api/auth', authRoutes);
+app.route('/api/admin', adminRoutes);
 
 // ✅ Health Check
 app.get('/', (c) => {

@@ -8,7 +8,6 @@ datasource db {
   provider = "sqlite"
 }
 
-
 model User {
   id           String         @id @default(cuid())
   email        String         @unique
@@ -25,26 +24,34 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  twoFactorSecret   String?   // ✅ 2FA secret store karne ke liye
-  twoFactorEnabled  Boolean   @default(false) // ✅ 2FA enabled hai ya nahi
-  
-  // Relations
-  referredBy   User?          @relation("UserReferrals", fields: [referredById], references: [id])
-  referrals    User[]         @relation("UserReferrals")
-  sessions     Session[]
-  pointLedger  PointLedger[] 
-  activities   UserActivity[]
-  @@index([referredById])
-  @@index([status])
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean   @default(false)
 
+  // ✅ Balances
+  walletBalance    Float   @default(0)
+  lockedBonus      Float   @default(0)
+  lockedRewards    Float   @default(0)
+  totalReleased    Float   @default(0)
+
+  // ✅ Purchase & Reward Tracking
   totalPurchased   Float   @default(0)
   totalRewards     Float   @default(0)
   isEligible       Boolean @default(false)
-  
-  purchases        Purchase[]           @relation("UserPurchases")
-  rewardsEarned    RewardDistribution[] @relation("Earner")
-  rewardsGenerated RewardDistribution[] @relation("Buyer")
 
+  // Relations
+  referredBy       User?                 @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals        User[]                @relation("UserReferrals")
+  sessions         Session[]
+  pointLedger      PointLedger[]
+  activities       UserActivity[]
+  purchases        Purchase[]            @relation("UserPurchases")
+  rewardsEarned    RewardDistribution[]  @relation("Earner")
+  rewardsGenerated RewardDistribution[]  @relation("Buyer")
+  bonusHistory     BonusTransaction[]
+  rewardHistory    RewardTransaction[]
+
+  @@index([referredById])
+  @@index([status])
 }
 
 model Session {
@@ -160,7 +167,7 @@ model AuditLog {
   newValue    String?
   ipAddress   String?
   createdAt   DateTime @default(now())
-  
+
   @@index([adminId])
   @@index([action])
 }
@@ -174,9 +181,9 @@ model Purchase {
   txHash       String?
   status       String   @default("COMPLETED")
   createdAt    DateTime @default(now())
-  
+
   user         User     @relation("UserPurchases", fields: [userId], references: [id])
-  
+
   @@index([userId])
   @@index([status])
 }
@@ -190,11 +197,67 @@ model RewardDistribution {
   rewardUSDT   Float
   status       String   @default("DISTRIBUTED")
   createdAt    DateTime @default(now())
-  
+
   earner       User     @relation("Earner", fields: [earnerId], references: [id])
   buyer        User     @relation("Buyer", fields: [buyerId], references: [id])
-  
+
   @@index([earnerId])
   @@index([buyerId])
   @@index([level])
+}
+
+// ============================================================
+// ✅ NAYE MODELS (Phase 8)
+// ============================================================
+
+model BonusTransaction {
+  id          String    @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String    // "SIGNUP", "PROMOTION", "REFERRAL", "ADMIN"
+  status      String    @default("LOCKED") // "LOCKED", "RELEASED"
+  reason      String?
+  releasedAt  DateTime?
+  releasedBy  String?
+  txHash      String?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+model RewardTransaction {
+  id          String    @id @default(cuid())
+  userId      String
+  amount      Float
+  level       Int       // 1-5
+  sourceId    String?
+  status      String    @default("LOCKED")
+  releasedAt  DateTime?
+  releasedBy  String?
+  txHash      String?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([level])
+}
+
+model ReleaseHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String   // "BONUS", "REWARD", "BOTH"
+  releasedBy  String
+  txHash      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([releasedBy])
 }

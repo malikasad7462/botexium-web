@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { createPrisma } from './prisma';
 
 interface RegisterInput {
@@ -180,4 +181,149 @@ export async function getCurrentUser(db: D1Database, userId: string) {
   }
 
   return user;
+}
+
+/*
+|--------------------------------------------------------------------------
+| FORGOT PASSWORD
+|--------------------------------------------------------------------------
+*/
+
+export async function requestPasswordReset(db: D1Database, email: string) {
+  const prisma = createPrisma(db);
+
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+  });
+
+  // Security: don't reveal if user exists
+  if (!user) {
+    return { success: true };
+  }
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = await bcrypt.hash(resetToken, 10);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      resetToken: hashedToken,
+      resetTokenExpires: expiresAt,
+    },
+  });
+
+  // TODO: Send email
+  console.log(`Reset link: http://localhost:3000/reset-password?token=${resetToken}`);
+
+  return { success: true, resetToken };
+}
+
+export async function verifyResetToken(db: D1Database, token: string) {
+  const prisma = createPrisma(db);
+
+  const user = await prisma.user.findFirst({
+    where: {
+      resetToken: { not: null },
+      resetTokenExpires: { gt: new Date() },
+    },
+  });
+
+  if (!user || !user.resetToken) {
+    return false;
+  }
+
+  return await bcrypt.compare(token, user.resetToken);
+}
+
+export async function resetPassword(
+  db: D1Database,
+  token: string,
+  newPassword: string
+) {
+  const prisma = createPrisma(db);
+
+  const user = await prisma.user.findFirst({
+    where: {
+      resetToken: { not: null },
+      resetTokenExpires: { gt: new Date() },
+    },
+  });
+
+  if (!user || !user.resetToken) {
+    throw new Error('Invalid or expired reset token');
+  }
+
+  const isValid = await bcrypt.compare(token, user.resetToken);
+  if (!isValid) {
+    throw new Error('Invalid reset token');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: hashedPassword,
+      resetToken: null,
+      resetTokenExpires: null,
+    },
+  });
+
+  return { success: true };
+}
+
+/*
+|--------------------------------------------------------------------------
+| CHANGE PASSWORD
+|--------------------------------------------------------------------------
+*/
+
+export async function changePassword(
+  db: D1Database,
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) {
+  const prisma = createPrisma(db);
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isValid) {
+    throw new Error('Current password is incorrect');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: hashedPassword },
+  });
+
+  return { success: true };
+}
+
+/*
+|--------------------------------------------------------------------------
+| 2FA
+|--------------------------------------------------------------------------
+*/
+
+export async function get2FAStatus(db: D1Database, userId: string) {
+  const prisma = createPrisma(db);
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { twoFactorEnabled: true },
+  });
+
+  return { enabled: user?.twoFactorEnabled || false };
 }

@@ -1458,13 +1458,13 @@ var init_query_compiler_fast_bg = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-m5YYIs/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-js7KOx/middleware-loader.entry.ts
 init_modules_watch_stub();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
 init_performance2();
 
-// .wrangler/tmp/bundle-m5YYIs/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-js7KOx/middleware-insertion-facade.js
 init_modules_watch_stub();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
@@ -19346,6 +19346,7 @@ var bcryptjs_default = {
 };
 
 // src/hono/services/auth.service.ts
+import * as crypto2 from "crypto";
 function generateReferralCode() {
   return "BTX" + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
@@ -19487,6 +19488,99 @@ async function getCurrentUser(db, userId) {
   return user;
 }
 __name(getCurrentUser, "getCurrentUser");
+async function requestPasswordReset(db, email) {
+  const prisma = createPrisma(db);
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() }
+  });
+  if (!user) {
+    return { success: true };
+  }
+  const resetToken = crypto2.randomBytes(32).toString("hex");
+  const hashedToken = await bcryptjs_default.hash(resetToken, 10);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1e3);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      resetToken: hashedToken,
+      resetTokenExpires: expiresAt
+    }
+  });
+  console.log(`Reset link: http://localhost:3000/reset-password?token=${resetToken}`);
+  return { success: true, resetToken };
+}
+__name(requestPasswordReset, "requestPasswordReset");
+async function verifyResetToken(db, token) {
+  const prisma = createPrisma(db);
+  const user = await prisma.user.findFirst({
+    where: {
+      resetToken: { not: null },
+      resetTokenExpires: { gt: /* @__PURE__ */ new Date() }
+    }
+  });
+  if (!user || !user.resetToken) {
+    return false;
+  }
+  return await bcryptjs_default.compare(token, user.resetToken);
+}
+__name(verifyResetToken, "verifyResetToken");
+async function resetPassword(db, token, newPassword) {
+  const prisma = createPrisma(db);
+  const user = await prisma.user.findFirst({
+    where: {
+      resetToken: { not: null },
+      resetTokenExpires: { gt: /* @__PURE__ */ new Date() }
+    }
+  });
+  if (!user || !user.resetToken) {
+    throw new Error("Invalid or expired reset token");
+  }
+  const isValid = await bcryptjs_default.compare(token, user.resetToken);
+  if (!isValid) {
+    throw new Error("Invalid reset token");
+  }
+  const hashedPassword = await bcryptjs_default.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: hashedPassword,
+      resetToken: null,
+      resetTokenExpires: null
+    }
+  });
+  return { success: true };
+}
+__name(resetPassword, "resetPassword");
+async function changePassword(db, userId, currentPassword, newPassword) {
+  const prisma = createPrisma(db);
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true }
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const isValid = await bcryptjs_default.compare(currentPassword, user.passwordHash);
+  if (!isValid) {
+    throw new Error("Current password is incorrect");
+  }
+  const hashedPassword = await bcryptjs_default.hash(newPassword, 12);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: hashedPassword }
+  });
+  return { success: true };
+}
+__name(changePassword, "changePassword");
+async function get2FAStatus(db, userId) {
+  const prisma = createPrisma(db);
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { twoFactorEnabled: true }
+  });
+  return { enabled: user?.twoFactorEnabled || false };
+}
+__name(get2FAStatus, "get2FAStatus");
 
 // src/hono/routes/auth.routes.ts
 var authRoutes = new Hono2();
@@ -19519,7 +19613,6 @@ authRoutes.post("/login", async (c2) => {
       },
       c2.env.JWT_SECRET
     );
-    console.log("\u2705 Token created:", token.slice(0, 30) + "...");
     setCookie(c2, COOKIE_NAME, token, {
       httpOnly: true,
       secure: false,
@@ -19527,13 +19620,10 @@ authRoutes.post("/login", async (c2) => {
       maxAge: 60 * 60 * 24 * 7,
       path: "/"
     });
-    console.log("\u2705 Cookie set:", COOKIE_NAME);
     return c2.json({
       success: true,
       message: "Login successful",
-      user,
-      tokenPreview: token.slice(0, 30) + "..."
-      // ✅ Debug
+      user
     });
   } catch (error3) {
     console.error("LOGIN ERROR:", error3);
@@ -19544,21 +19634,10 @@ authRoutes.post("/login", async (c2) => {
   }
 });
 authRoutes.post("/logout", (c2) => {
-  deleteCookie(c2, COOKIE_NAME, {
-    path: "/"
-  });
+  deleteCookie(c2, COOKIE_NAME, { path: "/" });
   return c2.json({
     success: true,
     message: "Logout successful"
-  });
-});
-authRoutes.get("/debug-cookie", (c2) => {
-  const token = getCookie(c2, COOKIE_NAME);
-  const cookieHeader = c2.req.header("Cookie") || "no cookie header";
-  return c2.json({
-    hasToken: !!token,
-    tokenPreview: token ? token.slice(0, 30) + "..." : null,
-    cookieHeader: cookieHeader.slice(0, 100)
   });
 });
 authRoutes.get("/me", async (c2) => {
@@ -19578,12 +19657,135 @@ authRoutes.get("/me", async (c2) => {
       user
     });
   } catch (error3) {
-    console.error("ME ERROR:", error3);
     return c2.json({
       success: false,
-      message: "Invalid or expired token",
-      error: error3.message
+      message: "Invalid or expired token"
     }, 401);
+  }
+});
+authRoutes.post("/forgot-password", async (c2) => {
+  try {
+    const { email } = await c2.req.json();
+    if (!email) {
+      return c2.json({
+        success: false,
+        message: "Email is required"
+      }, 400);
+    }
+    const result = await requestPasswordReset(c2.env.DB, email);
+    return c2.json({
+      success: true,
+      message: "Password reset link sent to your email",
+      // ✅ Development ke liye token return karo
+      resetToken: result.resetToken
+    });
+  } catch (error3) {
+    return c2.json({
+      success: false,
+      message: error3.message || "Something went wrong"
+    }, 500);
+  }
+});
+authRoutes.get("/verify-reset-token", async (c2) => {
+  try {
+    const token = c2.req.query("token");
+    if (!token) {
+      return c2.json({
+        success: false,
+        message: "Token is required"
+      }, 400);
+    }
+    const isValid = await verifyResetToken(c2.env.DB, token);
+    return c2.json({
+      success: true,
+      valid: isValid
+    });
+  } catch (error3) {
+    return c2.json({
+      success: false,
+      valid: false,
+      message: error3.message
+    }, 500);
+  }
+});
+authRoutes.post("/reset-password", async (c2) => {
+  try {
+    const { token, password } = await c2.req.json();
+    if (!token || !password) {
+      return c2.json({
+        success: false,
+        message: "Token and password are required"
+      }, 400);
+    }
+    if (password.length < 8) {
+      return c2.json({
+        success: false,
+        message: "Password must be at least 8 characters"
+      }, 400);
+    }
+    await resetPassword(c2.env.DB, token, password);
+    return c2.json({
+      success: true,
+      message: "Password reset successfully"
+    });
+  } catch (error3) {
+    return c2.json({
+      success: false,
+      message: error3.message || "Something went wrong"
+    }, 500);
+  }
+});
+authRoutes.post("/change-password", async (c2) => {
+  try {
+    const token = getCookie(c2, COOKIE_NAME);
+    if (!token) {
+      return c2.json({ success: false, message: "Auth required" }, 401);
+    }
+    const payload = await verify2(token, c2.env.JWT_SECRET, "HS256");
+    const userId = payload.userId;
+    const { currentPassword, newPassword } = await c2.req.json();
+    if (!currentPassword || !newPassword) {
+      return c2.json({
+        success: false,
+        message: "Current and new password are required"
+      }, 400);
+    }
+    if (newPassword.length < 8) {
+      return c2.json({
+        success: false,
+        message: "Password must be at least 8 characters"
+      }, 400);
+    }
+    await changePassword(c2.env.DB, userId, currentPassword, newPassword);
+    return c2.json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error3) {
+    return c2.json({
+      success: false,
+      message: error3.message || "Something went wrong"
+    }, 500);
+  }
+});
+authRoutes.get("/2fa/status", async (c2) => {
+  try {
+    const token = getCookie(c2, COOKIE_NAME);
+    if (!token) {
+      return c2.json({ success: false, message: "Auth required" }, 401);
+    }
+    const payload = await verify2(token, c2.env.JWT_SECRET, "HS256");
+    const userId = payload.userId;
+    const status = await get2FAStatus(c2.env.DB, userId);
+    return c2.json({
+      success: true,
+      enabled: status.enabled
+    });
+  } catch (error3) {
+    return c2.json({
+      success: false,
+      message: error3.message
+    }, 500);
   }
 });
 var auth_routes_default = authRoutes;
@@ -19717,7 +19919,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-m5YYIs/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-js7KOx/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -19753,7 +19955,7 @@ function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-m5YYIs/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-js7KOx/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

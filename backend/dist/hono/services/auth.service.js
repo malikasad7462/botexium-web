@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import * as crypto from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { createPrisma } from './prisma';
 function generateReferralCode() {
     return 'BTX' + Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -152,7 +152,7 @@ export async function requestPasswordReset(db, email) {
     if (!user) {
         return { success: true };
     }
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = randomBytes(32).toString('hex');
     const hashedToken = await bcrypt.hash(resetToken, 10);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await prisma.user.update({

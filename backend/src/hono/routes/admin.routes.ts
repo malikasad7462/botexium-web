@@ -18,6 +18,14 @@ import {
 } from '../services/admin.service';
 import { createPrisma } from '../services/prisma';
 
+// ✅ Hono Context Variables
+declare module 'hono' {
+  interface ContextVariableMap {
+    userId: string;
+    role: string;
+  }
+}
+
 type Env = {
   DB: D1Database;
   JWT_SECRET: string;
@@ -55,9 +63,8 @@ adminRoutes.use('*', async (c, next) => {
       return c.json({ success: false, message: 'Admin access required' }, 403);
     }
 
-    // Store user info in context
-    c.set('userId', userId);
-    c.set('role', user.role);
+    c.set('userId', userId as string);
+    c.set('role', user.role as string);
 
     await next();
   } catch (error) {
@@ -107,9 +114,14 @@ adminRoutes.get('/users/:id', async (c) => {
 
 adminRoutes.put('/users/:id/status', async (c) => {
   try {
-    const adminId = c.get('userId');
+    const adminId = c.get('userId') as string;
     const { status } = await c.req.json();
-    await updateUserStatus(c.env.DB, c.req.param('id'), status, adminId);
+    await updateUserStatus(
+      c.env.DB,
+      c.req.param('id'),
+      status as 'ACTIVE' | 'SUSPENDED' | 'BANNED',
+      adminId
+    );
     return c.json({ success: true });
   } catch (error: any) {
     return c.json({ success: false, message: error.message }, 500);
@@ -118,9 +130,14 @@ adminRoutes.put('/users/:id/status', async (c) => {
 
 adminRoutes.put('/users/:id/role', async (c) => {
   try {
-    const adminId = c.get('userId');
+    const adminId = c.get('userId') as string;
     const { role } = await c.req.json();
-    await updateUserRole(c.env.DB, c.req.param('id'), role, adminId);
+    await updateUserRole(
+      c.env.DB,
+      c.req.param('id'),
+      role as 'USER' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN',
+      adminId
+    );
     return c.json({ success: true });
   } catch (error: any) {
     return c.json({ success: false, message: error.message }, 500);
@@ -135,7 +152,7 @@ adminRoutes.put('/users/:id/role', async (c) => {
 
 adminRoutes.post('/users/:id/bonus', async (c) => {
   try {
-    const adminId = c.get('userId');
+    const adminId = c.get('userId') as string;
     const { amount, type, reason } = await c.req.json();
     const bonus = await addBonus(
       c.env.DB,
@@ -159,7 +176,7 @@ adminRoutes.post('/users/:id/bonus', async (c) => {
 
 adminRoutes.post('/users/:id/release', async (c) => {
   try {
-    const adminId = c.get('userId');
+    const adminId = c.get('userId') as string;
     const { releaseBonus, releaseRewards, txHash, notes } = await c.req.json();
     const result = await releaseUserFunds(
       c.env.DB,
@@ -170,7 +187,7 @@ adminRoutes.post('/users/:id/release', async (c) => {
       adminId,
       notes
     );
-    return c.json({ success: true, ...result });
+    return c.json({ ...result, success: true });
   } catch (error: any) {
     return c.json({ success: false, message: error.message }, 500);
   }
@@ -226,7 +243,7 @@ adminRoutes.get('/settings', async (c) => {
 
 adminRoutes.put('/settings/:key', async (c) => {
   try {
-    const adminId = c.get('userId');
+    const adminId = c.get('userId') as string;
     const { value } = await c.req.json();
     const setting = await updateSetting(
       c.env.DB,

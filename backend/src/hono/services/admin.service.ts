@@ -181,7 +181,7 @@ export async function getUserDetails(db: D1Database, userId: string) {
 export async function updateUserStatus(
   db: D1Database,
   userId: string,
-  status: string,
+  status: 'ACTIVE' | 'SUSPENDED' | 'BANNED',
   adminId: string
 ) {
   const prisma = createPrisma(db);
@@ -206,7 +206,7 @@ export async function updateUserStatus(
 export async function updateUserRole(
   db: D1Database,
   userId: string,
-  role: string,
+  role: 'USER' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN',
   adminId: string
 ) {
   const prisma = createPrisma(db);

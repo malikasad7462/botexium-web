@@ -26,7 +26,6 @@ adminRoutes.use('*', async (c, next) => {
         if (!user || !['ADMIN', 'SUPER_ADMIN', 'MODERATOR'].includes(user.role)) {
             return c.json({ success: false, message: 'Admin access required' }, 403);
         }
-        // Store user info in context
         c.set('userId', userId);
         c.set('role', user.role);
         await next();
@@ -121,7 +120,7 @@ adminRoutes.post('/users/:id/release', async (c) => {
         const adminId = c.get('userId');
         const { releaseBonus, releaseRewards, txHash, notes } = await c.req.json();
         const result = await releaseUserFunds(c.env.DB, c.req.param('id'), releaseBonus, releaseRewards, txHash, adminId, notes);
-        return c.json({ success: true, ...result });
+        return c.json({ ...result, success: true });
     }
     catch (error) {
         return c.json({ success: false, message: error.message }, 500);

@@ -18,10 +18,11 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', logger());
 
+// ✅ CORS — 127.0.0.1:3000 add kiya
 app.use('*', cors({
   origin: [
     'http://localhost:3000',
-    'http://127.0.0.1:8787',
+    'http://127.0.0.1:3000',
     'https://botexium.com',
     'https://botexium.pages.dev',
     'https://botexium-web.pages.dev',
@@ -49,42 +50,6 @@ app.get('/health', (c) => {
   return c.json({ status: 'healthy' });
 });
 
-// ✅ D1 Database Test Route
-app.get('/db-test', async (c) => {
-  try {
-    const result = await c.env.DB.prepare('SELECT 1 as test').first();
-    return c.json({
-      success: true,
-      message: 'D1 database connected!',
-      result,
-    });
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: error.message,
-    }, 500);
-  }
-});
-
-// ✅ Prisma + D1 Test Route
-app.get('/prisma-test', async (c) => {
-  try {
-    const prisma = createPrisma(c.env.DB);
-    const userCount = await prisma.user.count();
-    return c.json({
-      success: true,
-      message: 'Prisma + D1 connected!',
-      userCount,
-    });
-  } catch (error: any) {
-    return c.json({
-      success: false,
-      error: error.message,
-    }, 500);
-  }
-});
-
-// ✅ 404 Handler
 app.notFound((c) => {
   return c.json({
     success: false,

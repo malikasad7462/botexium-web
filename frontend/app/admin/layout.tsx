@@ -27,8 +27,7 @@ export default function AdminLayout({
           return;
         }
 
-        // ✅ Admin role check
-        if (!["ADMIN", "SUPER_ADMIN"].includes(data.user.role)) {
+        if (!["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(data.user.role)) {
           router.replace("/dashboard");
           return;
         }

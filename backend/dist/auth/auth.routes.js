@@ -1,17 +1,12 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const bcryptjs_1 = __importDefault(require("bcryptjs")); // ✅ bcrypt import
-const speakeasy_1 = __importDefault(require("speakeasy"));
-const qrcode_1 = __importDefault(require("qrcode"));
-const auth_service_1 = require("./auth.service");
-const auth_middleware_1 = require("./auth.middleware");
+import { Router } from "express";
+import bcrypt from "bcryptjs"; // ✅ bcrypt import
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
+import { registerUser, getUserByEmail, generateReferralLink, getMyReferrals, getMyReferralsByUserId, loginUser, getCurrentUser, requestPasswordReset, verifyResetToken, resetPassword, } from "./auth.service";
+import { authenticate, createAccessToken, } from "./auth.middleware";
 // ✅ Prisma import - auth.service se prisma use karo (kyunke wahan adapter set hai)
-const auth_service_2 = require("./auth.service");
-const router = (0, express_1.Router)();
+import { prisma } from "./auth.service";
+const router = Router();
 const COOKIE_NAME = "BOTEXIUM_token";
 function getCookieOptions() {
     const isProduction = process.env.NODE_ENV === "production";
@@ -31,7 +26,7 @@ function getCookieOptions() {
 router.post("/register", async (req, res) => {
     try {
         const { name, email, password, country, referralCode } = req.body;
-        const user = await (0, auth_service_1.registerUser)({
+        const user = await registerUser({
             name,
             email,
             password,
@@ -61,11 +56,11 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await (0, auth_service_1.loginUser)({
+        const user = await loginUser({
             email,
             password,
         });
-        const accessToken = (0, auth_middleware_1.createAccessToken)(user.id);
+        const accessToken = createAccessToken(user.id);
         res.cookie(COOKIE_NAME, accessToken, getCookieOptions());
         return res.status(200).json({
             success: true,
@@ -96,7 +91,7 @@ router.post("/forgot-password", async (req, res) => {
                 message: "Email is required",
             });
         }
-        const result = await (0, auth_service_1.requestPasswordReset)(email);
+        const result = await requestPasswordReset(email);
         return res.status(200).json({
             success: true,
             message: "Password reset link sent to your email",
@@ -124,7 +119,7 @@ router.get("/verify-reset-token", async (req, res) => {
                 message: "Token is required",
             });
         }
-        const isValid = await (0, auth_service_1.verifyResetToken)(token);
+        const isValid = await verifyResetToken(token);
         return res.status(200).json({
             success: true,
             valid: isValid,
@@ -159,7 +154,7 @@ router.post("/reset-password", async (req, res) => {
                 message: "Password must be at least 8 characters",
             });
         }
-        const result = await (0, auth_service_1.resetPassword)(token, password);
+        const result = await resetPassword(token, password);
         return res.status(200).json({
             success: true,
             message: "Password reset successfully",
@@ -178,7 +173,7 @@ router.post("/reset-password", async (req, res) => {
 | CURRENT USER
 |--------------------------------------------------------------------------
 */
-router.get("/me", auth_middleware_1.authenticate, async (req, res) => {
+router.get("/me", authenticate, async (req, res) => {
     try {
         if (!req.userId) {
             return res.status(401).json({
@@ -186,7 +181,7 @@ router.get("/me", auth_middleware_1.authenticate, async (req, res) => {
                 message: "Authentication required",
             });
         }
-        const user = await (0, auth_service_1.getCurrentUser)(req.userId);
+        const user = await getCurrentUser(req.userId);
         return res.status(200).json({
             success: true,
             user,
@@ -206,7 +201,7 @@ router.get("/me", auth_middleware_1.authenticate, async (req, res) => {
 | MY REFERRALS — AUTHENTICATED
 |--------------------------------------------------------------------------
 */
-router.get("/my-referrals", auth_middleware_1.authenticate, async (req, res) => {
+router.get("/my-referrals", authenticate, async (req, res) => {
     try {
         if (!req.userId) {
             return res.status(401).json({
@@ -214,7 +209,7 @@ router.get("/my-referrals", auth_middleware_1.authenticate, async (req, res) => 
                 message: "Authentication required",
             });
         }
-        const data = await (0, auth_service_1.getMyReferralsByUserId)(req.userId);
+        const data = await getMyReferralsByUserId(req.userId);
         return res.status(200).json({
             success: true,
             ...data,
@@ -255,7 +250,7 @@ router.post("/logout", (_req, res) => {
 | CHANGE PASSWORD - Authenticated
 |--------------------------------------------------------------------------
 */
-router.post("/change-password", auth_middleware_1.authenticate, async (req, res) => {
+router.post("/change-password", authenticate, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
         if (!req.userId) {
@@ -276,7 +271,7 @@ router.post("/change-password", auth_middleware_1.authenticate, async (req, res)
                 message: "Password must be at least 8 characters",
             });
         }
-        const user = await auth_service_2.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: req.userId },
             select: { passwordHash: true },
         });
@@ -286,15 +281,15 @@ router.post("/change-password", auth_middleware_1.authenticate, async (req, res)
                 message: "User not found",
             });
         }
-        const isValid = await bcryptjs_1.default.compare(currentPassword, user.passwordHash);
+        const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
         if (!isValid) {
             return res.status(401).json({
                 success: false,
                 message: "Current password is incorrect",
             });
         }
-        const hashedPassword = await bcryptjs_1.default.hash(newPassword, 12);
-        await auth_service_2.prisma.user.update({
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        await prisma.user.update({
             where: { id: req.userId },
             data: { passwordHash: hashedPassword },
         });
@@ -318,7 +313,7 @@ router.post("/change-password", auth_middleware_1.authenticate, async (req, res)
 */
 router.get("/users/:email", async (req, res) => {
     try {
-        const user = await (0, auth_service_1.getUserByEmail)(String(req.params.email));
+        const user = await getUserByEmail(String(req.params.email));
         return res.status(200).json({
             success: true,
             user,
@@ -349,7 +344,7 @@ router.get("/referral/:referralCode", async (req, res) => {
                 message: "Referral code is required",
             });
         }
-        const link = (0, auth_service_1.generateReferralLink)(referralCode);
+        const link = generateReferralLink(referralCode);
         return res.status(200).json({
             success: true,
             referralCode,
@@ -372,7 +367,7 @@ router.get("/referral/:referralCode", async (req, res) => {
 router.get("/referrals/:referralCode", async (req, res) => {
     try {
         const referralCode = String(req.params.referralCode);
-        const data = await (0, auth_service_1.getMyReferrals)(referralCode);
+        const data = await getMyReferrals(referralCode);
         return res.status(200).json({
             success: true,
             ...data,
@@ -394,7 +389,7 @@ router.get("/referrals/:referralCode", async (req, res) => {
 | 2FA - Enable
 |--------------------------------------------------------------------------
 */
-router.post("/2fa/enable", auth_middleware_1.authenticate, async (req, res) => {
+router.post("/2fa/enable", authenticate, async (req, res) => {
     try {
         if (!req.userId) {
             return res.status(401).json({
@@ -403,7 +398,7 @@ router.post("/2fa/enable", auth_middleware_1.authenticate, async (req, res) => {
             });
         }
         // Check if 2FA already enabled - ✅ email bhi select karo
-        const user = await auth_service_2.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: req.userId },
             select: { twoFactorEnabled: true, twoFactorSecret: true, email: true },
         });
@@ -414,16 +409,16 @@ router.post("/2fa/enable", auth_middleware_1.authenticate, async (req, res) => {
             });
         }
         // Generate secret - ✅ ab email available hai
-        const secret = speakeasy_1.default.generateSecret({
+        const secret = speakeasy.generateSecret({
             name: `BOTEXIUM (${user?.email || "User"})`,
         });
         // Save secret to database
-        await auth_service_2.prisma.user.update({
+        await prisma.user.update({
             where: { id: req.userId },
             data: { twoFactorSecret: secret.base32 },
         });
         // Generate QR Code
-        const qrCodeUrl = await qrcode_1.default.toDataURL(secret.otpauth_url);
+        const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
         return res.status(200).json({
             success: true,
             secret: secret.base32,
@@ -443,7 +438,7 @@ router.post("/2fa/enable", auth_middleware_1.authenticate, async (req, res) => {
 | 2FA - Verify
 |--------------------------------------------------------------------------
 */
-router.post("/2fa/verify", auth_middleware_1.authenticate, async (req, res) => {
+router.post("/2fa/verify", authenticate, async (req, res) => {
     try {
         const { token } = req.body;
         if (!req.userId) {
@@ -458,7 +453,7 @@ router.post("/2fa/verify", auth_middleware_1.authenticate, async (req, res) => {
                 message: "OTP token is required",
             });
         }
-        const user = await auth_service_2.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: req.userId },
             select: { twoFactorSecret: true, twoFactorEnabled: true },
         });
@@ -469,7 +464,7 @@ router.post("/2fa/verify", auth_middleware_1.authenticate, async (req, res) => {
             });
         }
         // Verify OTP
-        const verified = speakeasy_1.default.totp.verify({
+        const verified = speakeasy.totp.verify({
             secret: user.twoFactorSecret,
             encoding: "base32",
             token: token,
@@ -481,7 +476,7 @@ router.post("/2fa/verify", auth_middleware_1.authenticate, async (req, res) => {
             });
         }
         // Enable 2FA
-        await auth_service_2.prisma.user.update({
+        await prisma.user.update({
             where: { id: req.userId },
             data: { twoFactorEnabled: true },
         });
@@ -503,7 +498,7 @@ router.post("/2fa/verify", auth_middleware_1.authenticate, async (req, res) => {
 | 2FA - Disable
 |--------------------------------------------------------------------------
 */
-router.post("/2fa/disable", auth_middleware_1.authenticate, async (req, res) => {
+router.post("/2fa/disable", authenticate, async (req, res) => {
     try {
         if (!req.userId) {
             return res.status(401).json({
@@ -511,7 +506,7 @@ router.post("/2fa/disable", auth_middleware_1.authenticate, async (req, res) => 
                 message: "Authentication required",
             });
         }
-        await auth_service_2.prisma.user.update({
+        await prisma.user.update({
             where: { id: req.userId },
             data: {
                 twoFactorSecret: null,
@@ -536,7 +531,7 @@ router.post("/2fa/disable", auth_middleware_1.authenticate, async (req, res) => 
 | 2FA - Status
 |--------------------------------------------------------------------------
 */
-router.get("/2fa/status", auth_middleware_1.authenticate, async (req, res) => {
+router.get("/2fa/status", authenticate, async (req, res) => {
     try {
         if (!req.userId) {
             return res.status(401).json({
@@ -544,7 +539,7 @@ router.get("/2fa/status", auth_middleware_1.authenticate, async (req, res) => {
                 message: "Authentication required",
             });
         }
-        const user = await auth_service_2.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: req.userId },
             select: { twoFactorEnabled: true },
         });
@@ -561,4 +556,4 @@ router.get("/2fa/status", auth_middleware_1.authenticate, async (req, res) => {
         });
     }
 });
-exports.default = router;
+export default router;

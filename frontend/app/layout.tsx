@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import BackToTop from "@/components/BackToTop";
 import "./globals.css";
+import AnnouncementBar from "@/components/AnnouncementBar";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +47,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-[#050816] text-white antialiased">
         <Providers>
+          <AnnouncementBar />
           {children}
           <BackToTop />
         </Providers>

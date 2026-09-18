@@ -17,7 +17,7 @@ export default function Hero() {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-6 pt-12 sm:pt-16 lg:pt-24 pb-8 sm:pb-12 lg:pb-40 text-center">
 
         <span className="inline-block px-6 py-3 rounded-full glass-card text-cyan-300 text-sm tracking-[3px] uppercase">
-          The Future of Business • AI BOTS • Blockchain
+          The Future of Business • AI • Blockchain
         </span>
 
         <h1 className="mt-3 sm:mt-8 text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black leading-tight text-white">

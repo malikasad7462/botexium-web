@@ -1,11 +1,4 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAccessToken = createAccessToken;
-exports.authenticate = authenticate;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+import jwt from "jsonwebtoken";
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
@@ -13,14 +6,14 @@ function getJwtSecret() {
     }
     return secret;
 }
-function createAccessToken(userId) {
-    return jsonwebtoken_1.default.sign({
+export function createAccessToken(userId) {
+    return jwt.sign({
         userId,
     }, getJwtSecret(), {
         expiresIn: "7d",
     });
 }
-function authenticate(req, res, next) {
+export function authenticate(req, res, next) {
     try {
         const token = req.cookies?.BOTEXIUM_token;
         if (!token) {
@@ -29,7 +22,7 @@ function authenticate(req, res, next) {
                 message: "Authentication required",
             });
         }
-        const decoded = jsonwebtoken_1.default.verify(token, getJwtSecret());
+        const decoded = jwt.verify(token, getJwtSecret());
         if (typeof decoded !== "object" ||
             decoded === null ||
             typeof decoded.userId !== "string") {

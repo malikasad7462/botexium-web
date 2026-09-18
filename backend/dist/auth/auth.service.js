@@ -1,67 +1,17 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.prisma = void 0;
-exports.registerUser = registerUser;
-exports.getUserByEmail = getUserByEmail;
-exports.generateReferralLink = generateReferralLink;
-exports.getMyReferrals = getMyReferrals;
-exports.loginUser = loginUser;
-exports.getCurrentUser = getCurrentUser;
-exports.getMyReferralsByUserId = getMyReferralsByUserId;
-exports.requestPasswordReset = requestPasswordReset;
-exports.verifyResetToken = verifyResetToken;
-exports.resetPassword = resetPassword;
-require("dotenv/config");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const crypto = __importStar(require("crypto"));
-const client_1 = require("../generated/prisma/client");
-const adapter_libsql_1 = require("@prisma/adapter-libsql");
+import "dotenv/config";
+import bcrypt from "bcryptjs";
+import * as crypto from "crypto";
+import { PrismaClient } from "../generated/prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 // Prisma 7 کے لیے adapter کے ساتھ PrismaClient initialize کریں
-const adapter = new adapter_libsql_1.PrismaLibSql({
+const adapter = new PrismaLibSql({
     url: `file:${process.cwd()}/dev.db`,
 });
-const prisma = new client_1.PrismaClient({ adapter });
-exports.prisma = prisma;
+const prisma = new PrismaClient({ adapter });
 function generateReferralCode() {
     return "BTX" + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
-async function registerUser(input) {
+export async function registerUser(input) {
     const name = input.name?.trim();
     const email = input.email?.trim().toLowerCase();
     const password = input.password;
@@ -100,7 +50,7 @@ async function registerUser(input) {
     })) {
         newReferralCode = generateReferralCode();
     }
-    const passwordHash = await bcryptjs_1.default.hash(password, 12);
+    const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
         data: {
             name,
@@ -123,9 +73,54 @@ async function registerUser(input) {
             createdAt: true,
         },
     });
+    try {
+        const signupEnabled = await prisma.setting.findUnique({
+            where: { key: "signup_bonus_enabled" },
+        });
+        if (signupEnabled?.value === "true") {
+            const pointsSetting = await prisma.setting.findUnique({
+                where: { key: "signup_bonus_points" },
+            });
+            const tokensSetting = await prisma.setting.findUnique({
+                where: { key: "signup_bonus_tokens" },
+            });
+            const usdtSetting = await prisma.setting.findUnique({
+                where: { key: "signup_bonus_usdt" },
+            });
+            const bonusPoints = parseInt(pointsSetting?.value || "0");
+            const bonusTokens = parseFloat(tokensSetting?.value || "0");
+            const bonusUSDT = parseFloat(usdtSetting?.value || "0");
+            if (bonusPoints > 0 || bonusTokens > 0 || bonusUSDT > 0) {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        points: { increment: bonusPoints },
+                        totalRewards: { increment: bonusTokens },
+                    },
+                });
+                // ✅ Audit log
+                await prisma.auditLog.create({
+                    data: {
+                        adminId: "SYSTEM",
+                        action: "SIGNUP_BONUS",
+                        target: user.id,
+                        newValue: JSON.stringify({
+                            points: bonusPoints,
+                            tokens: bonusTokens,
+                            usdt: bonusUSDT,
+                        }),
+                    },
+                });
+            }
+        }
+    }
+    catch (error) {
+        console.error("Signup bonus error:", error);
+        // ✅ Signup bonus fail ho toh registration fail nahi honi chahiye
+    }
     return user;
 }
-async function getUserByEmail(email) {
+export async function getUserByEmail(email) {
     const user = await prisma.user.findUnique({
         where: {
             email: email.trim().toLowerCase(),
@@ -148,11 +143,11 @@ async function getUserByEmail(email) {
     }
     return user;
 }
-function generateReferralLink(referralCode) {
+export function generateReferralLink(referralCode) {
     const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
     return `${baseUrl}/register?ref=${encodeURIComponent(referralCode.trim().toUpperCase())}`;
 }
-async function getMyReferrals(referralCode) {
+export async function getMyReferrals(referralCode) {
     const code = referralCode.trim().toUpperCase();
     if (!code) {
         throw new Error("Referral code is required");
@@ -196,7 +191,7 @@ async function getMyReferrals(referralCode) {
         referrals,
     };
 }
-async function loginUser(input) {
+export async function loginUser(input) {
     const email = input.email?.trim().toLowerCase();
     const password = input.password;
     if (!email || !password) {
@@ -223,7 +218,7 @@ async function loginUser(input) {
     if (!user) {
         throw new Error("Invalid email or password");
     }
-    const passwordValid = await bcryptjs_1.default.compare(password, user.passwordHash);
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
         throw new Error("Invalid email or password");
     }
@@ -245,7 +240,7 @@ async function loginUser(input) {
         createdAt: user.createdAt,
     };
 }
-async function getCurrentUser(userId) {
+export async function getCurrentUser(userId) {
     if (!userId) {
         throw new Error("User ID is required");
     }
@@ -271,7 +266,7 @@ async function getCurrentUser(userId) {
     }
     return user;
 }
-async function getMyReferralsByUserId(userId) {
+export async function getMyReferralsByUserId(userId) {
     if (!userId) {
         throw new Error("User ID is required");
     }
@@ -320,7 +315,7 @@ async function getMyReferralsByUserId(userId) {
 | FORGOT PASSWORD - Request Reset Link
 |--------------------------------------------------------------------------
 */
-async function requestPasswordReset(email) {
+export async function requestPasswordReset(email) {
     try {
         const user = await prisma.user.findUnique({
             where: { email },
@@ -329,7 +324,7 @@ async function requestPasswordReset(email) {
             return true;
         }
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const hashedToken = await bcryptjs_1.default.hash(resetToken, 10);
+        const hashedToken = await bcrypt.hash(resetToken, 10);
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
         await prisma.user.update({
             where: { id: user.id },
@@ -351,7 +346,7 @@ async function requestPasswordReset(email) {
 | VERIFY RESET TOKEN
 |--------------------------------------------------------------------------
 */
-async function verifyResetToken(token) {
+export async function verifyResetToken(token) {
     try {
         const user = await prisma.user.findFirst({
             where: {
@@ -362,7 +357,7 @@ async function verifyResetToken(token) {
         if (!user) {
             return false;
         }
-        const isValid = await bcryptjs_1.default.compare(token, user.resetToken);
+        const isValid = await bcrypt.compare(token, user.resetToken);
         return isValid;
     }
     catch (error) {
@@ -375,7 +370,7 @@ async function verifyResetToken(token) {
 | RESET PASSWORD - Update with Token
 |--------------------------------------------------------------------------
 */
-async function resetPassword(token, newPassword) {
+export async function resetPassword(token, newPassword) {
     try {
         const user = await prisma.user.findFirst({
             where: {
@@ -386,11 +381,11 @@ async function resetPassword(token, newPassword) {
         if (!user) {
             throw new Error('Invalid or expired reset token');
         }
-        const isValid = await bcryptjs_1.default.compare(token, user.resetToken);
+        const isValid = await bcrypt.compare(token, user.resetToken);
         if (!isValid) {
             throw new Error('Invalid reset token');
         }
-        const hashedPassword = await bcryptjs_1.default.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         await prisma.user.update({
             where: { id: user.id },
             data: {
@@ -406,3 +401,4 @@ async function resetPassword(token, newPassword) {
         throw error;
     }
 }
+export { prisma };

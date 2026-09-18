@@ -1,0 +1,16 @@
+name = "botexium-api"
+main = "src/hono/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "botexium-db"
+database_id = "47dddfa6-d1a8-46d8-b262-172a92bf4676"
+
+[vars]
+FRONTEND_URL = "https://botexium.com"
+JWT_SECRET = "botexium-production-secret-key-2026-v2"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_USER = "info@botexium.com"
+SMTP_PASS = "iodlfdurojvxsryp"
